@@ -1,4 +1,4 @@
-# Vehicle-Number-Plate-Detection-Program
+# Simple Vehicle-Number-Plate-Detection-Program
 
 It compares the numerical image of the car license plate with the correlation value of each comparative image 
 and recognizes the 4 digit number of the license plate image.
