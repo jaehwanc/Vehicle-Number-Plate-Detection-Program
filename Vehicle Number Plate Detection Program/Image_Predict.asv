@@ -1,0 +1,35 @@
+clear; % 변수 초기화
+clc; % 화면 비움
+
+predict_No = []; % 저장공간 초기화
+threshold = 570; % correlation값의 threshold(허용한계점)설정
+
+file_name=uigetfile('*.jpg','Open File');
+input_image=sum(imread(file_name),3); % 자동차 번호판 이미지를 읽어옴
+input_image=sign(round(input_image/765)-0.5); % correlation의 최대값을 찾기 위해
+                                              % 자동차 번호판 이미지의 data를 흑백화(1과 -1로만 설정)
+load candy.mat; % 비교대상 이미지의 mat파일을 불러움
+
+candy=sign(round(candy/765)-0.5); % correlation의 최대값을 찾기 위해
+                                  % 비교대상 이미지의 data를 흑백화(1과-1로만 설정)
+[input_row_size input_column_size]=size(input_image); % 입력받은 자동차 번호판 이미지의 행렬 크기를 설정
+[candy_row_size candy_column_size,number]=size(candy); % 비교대상 이미지의 행렬 크기를 설정
+candy_size=candy_row_size * candy_column_size; % 비교대상 이미지와 correlation 할 부분의 행렬 크기를 설정
+
+for k=1:number
+    for n=1:input_row_size - candy_row_size + 1 % 입력받은 자동차 번호판 이미지와 비교대상 이미지의 correlation의 행에 대한 반복문
+        for m=1:input_column_size - candy_column_size + 1 % 입력받은 자동차 번호판 이미지와 비교대상 이미지의 correlation의 열에 대한 반복문
+            correlation=sum(sum(candy(:,:,k).*input_image(n:n+candy_row_size-1,m:m+candy_column_size-1))); % 자동차번호판의 번호와 비교대상 이미지와의 correlation
+            if correlation > threshold % correlation값중 최대값이 threshold값보다 클 경우
+                predict_No=[predict_No [mod(k,10); m]]; % 식별된 숫자를 순서대로 벡터에 저장
+            end
+        end
+    end
+end
+
+if(length(predict_No)==4) % 자동차 번호판 이미지로부터 식별된 번호의 개수가 4일 경우에만 번호를 출력 
+    [column Position]=sort(predict_No(2,:),2); % 각 식별된 번호를 순서대로 배치
+    No=predict_No(1,Position(1))*1000+predict_No(1,Position(2))*100+predict_No(1,Position(3))*10+predict_No(1,Position(4)) % 배치된 번호를 자릿수에 맞게 출력하기위해 
+else                                                                                                                       % 각자리에 맞게 자릿수를 곱함  
+    fprintf('error!\n'); % 자동차 번호판 이미지로부터 식별된 번호의 개수가 4개가 아닐 경우 error를 출력
+end
